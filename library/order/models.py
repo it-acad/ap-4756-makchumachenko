@@ -16,15 +16,15 @@ class Order(models.Model):
     type created_at: int (timestamp)
     param end_at: Describes the actual return date of the book. (`None` if not returned)
     type end_at: int (timestamp)
-    param plated_end_at: Describes the planned return period of the book (2 weeks from the moment of creation).
-    type plated_end_at: int (timestamp)
+    param planned_end_at: Describes the planned return period of the book (2 weeks from the moment of creation).
+    type planned_end_at: int (timestamp)
     """
 
     book = models.ForeignKey(Book, on_delete=models.CASCADE, default=None)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
-    end_at = models.DateTimeField(default=None, null=True, blank=True)
-    plated_end_at = models.DateTimeField(default=None)
+    end_at = models.DateTimeField(default=None, null=True, blank=True, verbose_name="Returned on")
+    planned_end_at = models.DateTimeField(default=None, verbose_name="Planned return on")
 
     def __str__(self):
         """
@@ -33,21 +33,12 @@ class Order(models.Model):
         """
         if self.end_at == None:
             return (
-                f"'id': {self.pk}, "
-                f"'user': CustomUser(id={self.user.pk}),"
-                f" 'book': Book(id={self.book.pk}),"
-                f" 'created_at': '{self.created_at}',"
-                f" 'end_at': {self.end_at},"
-                f" 'plated_end_at': '{self.plated_end_at}'"
-            )
-        else:
-            return (
-                f"'id': {self.pk}, "
-                f"'user': CustomUser(id={self.user.pk}),"
-                f" 'book': Book(id={self.book.pk}),"
-                f" 'created_at': '{self.created_at}',"
-                f" 'end_at': '{self.end_at}',"
-                f" 'plated_end_at': '{self.plated_end_at}'"
+                f"Id: {self.pk},"
+                f" user: {self.user.pk!s},"
+                f" Book: {self.book.pk!s},"
+                f" Created at: '{self.created_at}',"
+                f" Planned return on: '{self.planned_end_at}',"
+                f" Actual return on: {self.end_at if self.end_at is not None else "-"}"
             )
 
     def __repr__(self):
@@ -59,7 +50,7 @@ class Order(models.Model):
 
     def to_dict(self):
         """
-        :return: order id, book id, user id, order created_at, order end_at, order plated_end_at
+        :return: order id, book id, user id, order created_at, order end_at, order planned_end_at
         :Example:
         | {
         |   'id': 8,
@@ -67,13 +58,13 @@ class Order(models.Model):
         |   'user': 8',
         |   'created_at': 1509393504,
         |   'end_at': 1509393504,
-        |   'plated_end_at': 1509402866,
+        |   'planned_end_at': 1509402866,
         | }
         """
         pass
 
     @staticmethod
-    def create(user, book, plated_end_at):
+    def create(user, book, planned_end_at):
         orders = Order.objects.all()
         books = set()
         for order in orders:
@@ -82,7 +73,7 @@ class Order(models.Model):
         if book.id in books and book.count <= 0:
             return None
         try:
-            order = Order(user=user, book=book, plated_end_at=plated_end_at)
+            order = Order(user=user, book=book, planned_end_at=planned_end_at)
             order.save()
             book.count -= 1
             book.save()
@@ -99,9 +90,9 @@ class Order(models.Model):
         except:
             return None
 
-    def update(self, plated_end_at=None, end_at=None):
-        if plated_end_at != None:
-            self.plated_end_at = plated_end_at
+    def update(self, planned_end_at=None, end_at=None):
+        if planned_end_at != None:
+            self.planned_end_at = planned_end_at
         if end_at != None:
             self.end_at = end_at
         self.save()

@@ -1,4 +1,3 @@
-import book.models
 from django.db import models
 
 
@@ -25,10 +24,10 @@ class Author(models.Model):
         Magic method is redefined to show all information about Author.
         :return: author id, author name, author surname, author patronymic
         """
-        return (
-            f"'id': {self.pk}, 'name': '{self.name}',"
-            f" 'surname': '{self.surname}', 'patronymic': '{self.patronymic}'"
-        )
+        return ' '.join([
+            i for i in (self.name, self.patronymic, self.surname)
+            if i is not None
+        ])
 
     def __repr__(self):
         """
