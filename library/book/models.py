@@ -1,4 +1,6 @@
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
+import datetime
 
 
 class Book(models.Model):
@@ -21,7 +23,9 @@ class Book(models.Model):
     count = models.IntegerField(default=10, verbose_name="Total amount")
     id = models.AutoField(primary_key=True)
     authors = models.ManyToManyField("author.Author", related_name="books")
-    year_of_publication = models.DateField(blank=True, null=True)
+    year_of_publication = models.IntegerField(blank=True, null=True, validators=[
+        MinValueValidator(0), MaxValueValidator(datetime.date.today().year)
+    ])
 
 
     def __str__(self):
