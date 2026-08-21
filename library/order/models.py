@@ -20,7 +20,7 @@ class Order(models.Model):
     type planned_end_at: int (timestamp)
     """
 
-    book = models.ForeignKey(Book, on_delete=models.CASCADE, default=None)
+    book = models.ForeignKey(Book, on_delete=models.CASCADE, default=None, related_name="orders")
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
     end_at = models.DateTimeField(default=None, null=True, blank=True, verbose_name="Returned on")
@@ -33,9 +33,8 @@ class Order(models.Model):
         """
         if self.end_at == None:
             return (
-                f"Id: {self.pk},"
-                f" user: {self.user.pk!s},"
-                f" Book: {self.book.pk!s},"
+                f" User: {self.user!s},"
+                f" Book: {self.book!s},"
                 f" Created at: '{self.created_at}',"
                 f" Planned return on: '{self.planned_end_at}',"
                 f" Actual return on: {self.end_at if self.end_at is not None else "-"}"
